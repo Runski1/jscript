@@ -23,4 +23,8 @@ function sortByVotes(a, b) {
     return b.votes - a.votes;
 }
 candidates.sort(sortByVotes)
-console.log(candidates)
+const myStr = `The winner is ${candidates[0].name} with ${candidates[0].votes} votes.\nresults:`;
+console.log(myStr);
+for (let candidate of candidates) {
+    console.log(`${candidate.name}: ${candidate.votes} votes`);
+}
