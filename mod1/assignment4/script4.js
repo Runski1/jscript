@@ -4,16 +4,16 @@ const randomNumber = Math.floor(Math.random() * 4);
 console.log(randomNumber);
 let house;
 switch (randomNumber) {
-    case 1:
+    case 0:
     house = 'Gryffindor';
     break;
-    case 2:
+    case 1:
     house = 'Slytherin';
     break;
-    case 3:
+    case 2:
     house = 'Hufflepuff';
     break;
-    case 4:
+    case 3:
     house = 'Ravenclaw';
     break;
 }
