@@ -98,26 +98,21 @@ for (let pic of picArray) {
   article.classList.add('card');
   // create header
   let element = document.createElement('h2');
-  let textNode = document.createTextNode(pic.title);
-  element.appendChild(textNode);
+  element.textContent = pic.title
   article.appendChild(element);
   // create figure
   element = document.createElement('figure'); // fig as element to be appended into article
   let img = document.createElement('img');  // subclass img
-  let attribute  = document.createAttribute('src');  // img attribute
-  textNode = pic.image.medium;
-  attribute.value = textNode;
-  img.setAttributeNode(attribute);
+  img.src = pic.image.medium
+  img.alt = pic.title
   element.appendChild(img);  // img into fig
   let figcaption = document.createElement('figcaption');  // subclass figcaption
-  textNode = document.createTextNode(pic.caption);
-  figcaption.appendChild(textNode);
+  figcaption.textContent = pic.caption;
   element.appendChild(figcaption);  // figcaption into fig
   article.appendChild(element);  // fig into article
   // create paragraph
   element = document.createElement('p');
-  textNode = document.createTextNode(pic.description);
-  element.appendChild(textNode);
+  element.textContent = pic.description;
   article.appendChild(element);
   targetElement.appendChild(article);
   // NEVER DO THIS AGAIN
