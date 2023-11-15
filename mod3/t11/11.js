@@ -120,24 +120,18 @@ for (let pic of picArray) {
   // GOING FORWARD, PLEASE DONT REUSE VARIABLES, BUT NAME EACH ONE FOR RESPECTIVE NODE
 }
 
-function displayImage(i) {
-  modal.querySelector('img').src = picArray[i].image.large;
-  modal.showModal();
-}
-function closeModal() {
-  modal.close()
-  modal.querySelector('img').src = "";
-}
 const articles = document.getElementsByTagName('article');
 const modal = document.querySelector('dialog');
 const modalClose = document.querySelector('span');
-// WHAT SORCERY IS THIS?? @chat-gpt
+
 for (let i = 0; i < articles.length; i++) {
-  // Use a closure to capture the current value of i
-  (function (index) {  // tässä i syötetään sekä articles:lle ja displayimagen parametriksi?
-    articles[index].addEventListener('click', function () {  // merkintä function () on ilmeisesti nimeämätön funktio
-      displayImage(index);  // eli tämä taitaa olla displayimagen kutsuntafunktio?
-    });
-  })(i); // i passataan täällä sisäfunktioon (1)
+  articles[i].addEventListener('click', function () {  // Just FYI, to pass an argument into the function that event listener calls, you should call said
+    // function with an anon function
+    modal.querySelector('img').src = picArray[i].image.large;
+    modal.showModal();
+  })
 }
-modalClose.addEventListener('click', closeModal);
+modalClose.addEventListener('click', function () {  
+  modal.close()
+  modal.querySelector('img').src = "";
+});  // 
