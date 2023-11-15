@@ -7,3 +7,5 @@ for (let firstName of names) {
     listItem.appendChild(textNode);
     targetElement.appendChild(listItem);
 }
+const secondItem = targetElement.getElementsByTagName('li')[1];
+secondItem.classList.add('my-item');
