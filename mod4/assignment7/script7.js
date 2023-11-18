@@ -15,6 +15,12 @@ const apiAddress = 'https://api.digitransit.fi/routing/v1/routers/hsl/index/grap
 
 // fetch route with origin and target
 function getRoute(origin, target) {
+    // Delete old routes from map first:
+    map.eachLayer((layer) => {
+        if (layer instanceof L.Polyline) {
+            map.removeLayer(layer);
+        }
+    });
     // GraphQL query
     const GQLQuery = `{
   plan(
@@ -36,7 +42,7 @@ function getRoute(origin, target) {
     }
   }
 }`;
-
+// fetch with optional parameters:
     const fetchOptions = {
         method: 'POST',
         headers: {
@@ -45,12 +51,15 @@ function getRoute(origin, target) {
         },
         body: JSON.stringify({query: GQLQuery}),
     };
-
+    let startTime;
+    let endTime;
     fetch(apiAddress, fetchOptions).then(function (response) {
         return response.json();
-    }).then(function (result) {
+    }).then(function (result) { // CBA to learn to understand leaflet functionality
         console.log(result.data.plan.itineraries[0].legs);
         const googleEncodedRoute = result.data.plan.itineraries[0].legs;
+        startTime = googleEncodedRoute[0].startTime;
+        endTime = googleEncodedRoute[googleEncodedRoute.length - 1].endTime;
         for (let i = 0; i < googleEncodedRoute.length; i++) {
             let color = '';
             switch (googleEncodedRoute[i].mode) {
@@ -77,13 +86,13 @@ function getRoute(origin, target) {
             }).addTo(map);
         }
         map.fitBounds([[origin.latitude, origin.longitude], [target.latitude, target.longitude]]);
+        printTimes([startTime, endTime]) // Because this function is called here instead of event listener...
+        return [startTime, endTime];  // ... returned array is not used for anything
     }).catch(function (e) {
         console.error(e.message);
     });
 }
 
-// get route from origin to target
-//getRoute({latitude: 60.24, longitude: 24.74}, {latitude: 60.16, longitude: 24.92})
 
 // My stuff is added here //
 
@@ -91,15 +100,43 @@ const button = document.querySelector('input[type="submit"]');
 button.addEventListener('click', async (event) => {
     event.preventDefault();
     const startLocation = document.querySelector('#query').value;
-    console.log(startLocation, typeof(startLocation));
     const startCoords = await getCoords(startLocation);
-    console.log(startCoords, startCoords[0], typeof(startCoords[0]))
-    getRoute({latitude: startCoords[1], longitude: startCoords[0]}, {latitude: 60.224134315222514, longitude: 24.758623338563144})
-})
+    getRoute(
+        {latitude: startCoords[1], longitude: startCoords[0]}, 
+        {latitude: 60.224134315222514, longitude: 24.758623338563144}
+    )// If I store this in variable and console log it, It'll be undefined.
+    // Why doesn't it wait until promise from fetch is fulfilled???
+    // I tried const timeArray = await getRoute, and getRoute was async function.
+});
 
 async function getCoords(address) {
-    const response = await fetch(`https://api.digitransit.fi/geocoding/v1/search?digitransit-subscription-key=a5e40205ed774018b7580940980d75a0&text=${address}&size=1`);
+    const response = await fetch(
+        `https://api.digitransit.fi/geocoding/v1/search?` +
+        `digitransit-subscription-key=a5e40205ed774018b7580940980d75a0` +
+        `&text=${address}` +
+        `&size=1`
+        );
     const geoJSON = await response.json();
     const coords = geoJSON.features[0].geometry.coordinates;
     return coords;
+}
+
+function printTimes(timeArray) {
+    let startTime = new Date(timeArray[0]);
+    let endTime = new Date(timeArray[1]);
+    let startHours = startTime.getHours();
+    let startMinutes = startTime.getMinutes();
+    let endHours = endTime.getHours();
+    let endMinutes = endTime.getMinutes();
+    const timeStrings = [];
+    for (let num of [startHours, startMinutes, endHours, endMinutes]) { // Converting times to strings might not be needed
+        if (num < 10) {
+            timeStrings.push(`0${num.toString()}`); // This is for printing ie. 13:07 instead of 13:7
+        } else {
+            timeStrings.push(num.toString());
+        }
+    }
+    // Ugly element injection, need to clean up later
+    document.querySelector('.times').innerHTML = `<p>Start time: ${timeStrings[0]}:${timeStrings[1]}</p>\n<p>End time: ${timeStrings[2]}:${timeStrings[3]}</p>`
+    
 }
